@@ -28,10 +28,10 @@ class Database:
                     CREATE TABLE IF NOT EXISTS projects (
                         id SERIAL PRIMARY KEY,
                         name VARCHAR(255) NOT NULL,
-                        status VARCHAR(20) DEFAULT 'active'
+                        status VARCHAR(20) DEFAULT 'Active'
                             CHECK (status IN ('Active', 'Done', 'Canceled')),
                         created_at INTEGER not NULL,
-                        updatetd_at INTEGER
+                        updated_at INTEGER
                     );
                 """)
                 
@@ -57,7 +57,7 @@ class Database:
                         FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
                         FOREIGN KEY (employee_id) REFERENCES employees (id) ON DELETE SET NULL,
                         created_at INTEGER NOT NULL,
-                        updatetd_at INTEGER
+                        updated_at INTEGER
                     );
                 """)
             conn.commit()
@@ -68,7 +68,7 @@ class Database:
             with self.get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute("""
-                        SELECT t.id, t.name, e.first_name || ' ' || e.last_name, p.name AS project_name, t. status
+                        SELECT t.id, t.name, t.discription, e.first_name || ' ' || e.last_name, p.name AS project_name, t. status
                         FROM tasks t
                         JOIN projects p ON t.project_id = p.id
                         JOIN employees e ON t.employee_id = e.id
@@ -100,6 +100,20 @@ class Database:
         except Exception as e:
             raise Exception(f"Неизвестная ошибка: {e}")
         
+    def edit_task(self, row_id, task_name, task_discription, task_project, task_employee, task_status, updated_at):
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """UPDATE tasks 
+                        set name = %s, discription = %s, project_id = %s, employee_id = %s, status = %s, updated_at = %s
+                        WHERE id = %s""",
+                        (task_name, task_discription, task_project, task_employee, task_status, updated_at, row_id)
+                    )
+                conn.commit()
+        except Exception as e:
+            raise Exception(f"Неизвестная ошибка: {e}")
+        
     def get_projects(self):
         try:
             with self.get_connection() as conn:
@@ -123,6 +137,20 @@ class Database:
                         (name, status, created_at)
                         VALUES (%s, %s, %s)""",
                         (project.name, project.status, project.created_at)
+                    )
+                conn.commit()
+        except Exception as e:
+            raise Exception(f"Неизвестная ошибка: {e}")
+        
+    def edit_project(self, row_id, project_name, project_status, updated_at):
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """UPDATE projects 
+                        set name = %s, status = %s, updated_at = %s
+                        WHERE id = %s""",
+                        (project_name, project_status, updated_at, row_id)
                     )
                 conn.commit()
         except Exception as e:
@@ -156,6 +184,20 @@ class Database:
         except Exception as e:
             raise Exception(f"Неизвестная ошибка: {e}")
         
+    def edit_employee(self, row_id, employee_first_name, employee_last_name, employee_email):
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """UPDATE employees 
+                        set first_name = %s, last_name = %s, email = %s
+                        WHERE id = %s""",
+                        (employee_first_name, employee_last_name, employee_email, row_id)
+                    )
+                conn.commit()
+        except Exception as e:
+            raise Exception(f"Неизвестная ошибка: {e}")
+        
     def delete_task(self, row_id):
         try:
             with self.get_connection() as conn:
@@ -167,3 +209,20 @@ class Database:
                 conn.commit()
         except Exception as e:
             raise Exception(f"Неизвестная ошибка: {e}")
+        
+    def get_tasks_for_statistics(self):
+        """Получить все задачи для статистики."""
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT t.id, t.name, t.discription, e.id, e.first_name, e.last_name, p.name, p.id, t.status
+                        FROM tasks t
+                        JOIN projects p ON t.project_id = p.id
+                        JOIN employees e ON t.employee_id = e.id
+                        ORDER BY t.id
+                    """)
+                    rows = cur.fetchall()
+                    return rows
+        except Exception as e:
+            raise Exception(f"Ошибка при получении задач: {e}")
