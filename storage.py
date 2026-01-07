@@ -1,7 +1,4 @@
 import psycopg2
-from psycopg2.extras import RealDictCursor
-import re
-from model import Project, Task, Employee
 
 class Database:
     def __init__(self, host="localhost", port=5432, dbname="final_certification", 

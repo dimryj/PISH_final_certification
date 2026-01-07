@@ -4,6 +4,7 @@ from model import Task, Project, Employee
 from storage import Database
 from analysis import project_statistics, plot_completion_rate
 import time
+from utils import is_valid_email, clean_string
 
 class TaskTrackerApp:
     def __init__(self, root):
@@ -140,7 +141,7 @@ class TaskTrackerApp:
 
     def add_task(self):
         try:
-            name = self.task_name_entry.get()
+            name = clean_string(self.task_name_entry.get())
             if not name:
                 messagebox.showerror("Ошибка", "Заголовок задачи не может быть пустым!")
                 return
@@ -237,9 +238,15 @@ class TaskTrackerApp:
 
     def add_employee(self):
         try:
-            employee_first_name = self.employee_first_name_entry.get()
-            employee_last_name = self.employee_last_name_entry.get()
+            employee_first_name = clean_string(self.employee_first_name_entry.get())
+            employee_last_name = clean_string(self.employee_last_name_entry.get())
             employee_email = self.employee_email_entry.get()
+
+            if employee_first_name == '' or employee_last_name == '' or employee_email == '':
+                raise ValueError('Все поля должны быть заполнены')
+
+            if not is_valid_email(employee_email):
+                raise ValueError('Не корректная почта')
 
             employee = Employee(employee_first_name, employee_last_name, employee_email)
             self.db.add_employee(employee)
@@ -247,7 +254,7 @@ class TaskTrackerApp:
             self.clear_employee_fields()
             self.refresh_employees()
         except Exception as e:
-            messagebox.showerror("Ошибка", f"Не удалось добавить проект: {e}")
+            messagebox.showerror("Ошибка", f"Не удалось добавить сотрудника: {e}")
 
     def edit_employee(self):
         try:
