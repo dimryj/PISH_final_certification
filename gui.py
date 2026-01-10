@@ -1,3 +1,12 @@
+"""
+Модуль графического интерфейса для приложения "Задачник"
+
+Classes
+-----------
+
+TaskTrackerApp
+"""
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 from model import Task, Project, Employee
@@ -6,7 +15,10 @@ from analysis import project_statistics, plot_completion_rate
 import time
 from utils import is_valid_email, clean_string
 
-class TaskTrackerApp:
+class TaskTrackerApp: #TODO разнести функции по вкладкам на разыне файлы, что бы было проще работать с отдальными вкладками
+    """
+    Настольное приложение "Задачник"
+    """
     def __init__(self, root):
         self.root = root
         self.root.title("Задачник")
@@ -17,6 +29,15 @@ class TaskTrackerApp:
         self.employees_list.bind("<<TreeviewSelect>>", self.on_employee_row_select)
 
     def main_ui(self):
+        """
+            Создание основных элементов интерфейса
+
+            Создает основные вкладки, задачет их названия и запускает функции их наполнения
+
+            Examples
+            --------
+            >>> app.main_ui()
+        """
         tab_control = ttk.Notebook(self.root)
         
         self.tab_tasks = ttk.Frame(tab_control)
@@ -34,10 +55,17 @@ class TaskTrackerApp:
         self.create_projects_tab()
         self.create_employee_tab()
         self.create_statistics_tab()
-    
-    #TODO разнести функции по вкладкам на разыне файлы, что бы было проще
 
     def create_tasks_tab(self):
+        """
+            Интерфейс вкладки "Задачи"
+
+            Отрисовывает заголовки, кнопки, фильтр и список задач
+
+            Examples
+            --------
+            >>> app.create_tasks_tab()
+        """
         tk.Label(self.tab_tasks, text="Название:").grid(row=0, column=0, padx=5, pady=5)
         self.task_name_entry = tk.Entry(self.tab_tasks, width=50)
         self.task_name_entry.grid(row=0, column=1, padx=5, pady=5)
@@ -82,6 +110,15 @@ class TaskTrackerApp:
         tk.Button(self.tab_tasks, text="Удалить задачу", command=self.delete_task).grid(row=8, column=0, padx=5, pady=5)
 
     def create_projects_tab(self):
+        """
+            Интерфейс вкладки "Проекты"
+
+            Отрисовывает заголовки, кнопки и список проектов
+
+            Examples
+            --------
+            >>> app.create_projects_tab()
+        """
         tk.Label(self.tab_projects, text="Название:").grid(row=0, column=0, padx=5, pady=5)
         self.project_name_entry = tk.Entry(self.tab_projects, width=50)
         self.project_name_entry.grid(row=0, column=1, padx=5, pady=5)
@@ -102,6 +139,16 @@ class TaskTrackerApp:
         self.refresh_projects()
 
     def create_employee_tab(self):
+        """
+            Интерфейс вкладки "Сотрудники"
+
+            Отрисовывает заголовки, кнопки и список сотрудников
+
+            Examples
+            --------
+            >>> app.create_employee_tab()
+
+        """
         tk.Label(self.tab_employee, text="Имя:").grid(row=0, column=0, padx=5, pady=5)
         self.employee_first_name_entry = tk.Entry(self.tab_employee, width=50)
         self.employee_first_name_entry.grid(row=0, column=1, padx=5, pady=5)
@@ -127,6 +174,15 @@ class TaskTrackerApp:
         self.refresh_employees()
 
     def create_statistics_tab(self):
+        """
+            Интерфейс вкладки "Статистика"
+
+            Отрисовывает заголовки, текстовое поле и кнопки для вкладки статистики
+
+            Examples
+            --------
+            >>> app.create_statistics_tab()
+        """
         tk.Label(self.tab_statistics, text="Проект:").grid(row=0, column=0, padx=5, pady=5)
         self.analysis_project_id_entry = ttk.Combobox(self.tab_statistics, values=self.db.get_projects(), state='readonly')
         self.analysis_project_id_entry.grid(row=0, column=1, padx=5, pady=5)
@@ -140,6 +196,17 @@ class TaskTrackerApp:
         tk.Button(self.tab_statistics, text="Сохранить отчёт в файл", command=self.save_report).grid(row=2, column=0, columnspan=3, pady=10)
 
     def add_task(self):
+        """
+            Добавление задачи
+
+            Берет значения из полей для ввода, добавляет задачу в базу данных, показывает
+            сообщение о добавленной задаче, очищает поля ввода и обновляет таблицу с задачами.
+            В случае ошибки при получении данных отображает сообщение об ошибке пользователю.
+            
+            Examples
+            --------
+            >>> app.add_task()
+        """
         try:
             name = clean_string(self.task_name_entry.get())
             if not name:
@@ -160,6 +227,17 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось добавить задачу: {e}")
 
     def edit_task(self):
+        """
+            Редактирование задачи
+
+            Берет значения из полей для ввода, проверяет что выбрана строка, которую необходимо изменить,
+            сохраняет изменения базе данных, показывает сообщение об успехе изменения.
+            В случае ошибки при получении данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.edit_task()
+        """
         try:
             task_name = self.task_name_entry.get()
             task_discription = self.task_discription_entry.get()
@@ -180,6 +258,16 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось обновить задачу: {e}")
 
     def filter_tasks(self):
+        """
+            Показывает все задачи или с учетом выбранного фильтра
+
+            Берет значения из поля фильтра, получает все задачи из базы данных и заполняет ими таблицу с задачами.
+            В случае ошибки при получении данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.filter_tasks()
+        """
         try:
             status_filter = self.status_filter.get()
             tasks = self.db.get_tasks()
@@ -197,6 +285,18 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось отфильтровать задачи: {e}")
 
     def add_project(self):
+        """
+            Добавление проекта
+
+            Берет значения из полей для ввода, добавлет проект в базу данных, показывает сообщение об успехе клиенту и обновляет список проектов.
+            При успехе показывает сообщение о добавлении, очищает поля ввода и обновлет список проектов.
+            В случае ошибки при получении данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.add_project()
+        
+        """
         try:
             project_name = self.project_name_entry.get()
             project_status = self.project_status_entry.get()
@@ -210,6 +310,17 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось добавить проект: {e}")
 
     def edit_project(self):
+        """
+            Редактирование проекта
+
+            Берет значения из полей для ввода, проверяет что выбрана строка, которую необходимо изменить, 
+            изменияет запись и обновлет список проектов.В случае ошибки при получении
+            данных отображает сообщение об ошибке пользователю.
+            
+            Examples
+            --------
+            >>> app.edit_project()
+        """
         try:
             project_name = self.project_name_entry.get()
             project_status = self.project_status_entry.get()
@@ -227,6 +338,17 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось обновить проект: {e}")
 
     def refresh_projects(self):
+        """
+            Обновляет список проектов в интерфейсе приложения.
+
+            Метод очищает таблицу проектов, загружает актуальный список проектов
+            из базы данных и отображает их в таблице. В случае ошибки при получении
+            данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.refresh_projects()
+        """
         try: 
             for row in self.projects_list.get_children():
                 self.projects_list.delete(row)
@@ -237,6 +359,18 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось обновить проекты: {e}")
 
     def add_employee(self):
+        """
+            Добавление сотрудников.
+
+            Метод берет данные из полей ввода, проверяет их на заполненость,
+            создает нового сотрудника в базе данных, показывает сообщение 
+            о добавлении сотрудника и обновляет список сотрудников. В случае ошибки при получении
+            данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.refresh_projects()
+        """
         try:
             employee_first_name = clean_string(self.employee_first_name_entry.get())
             employee_last_name = clean_string(self.employee_last_name_entry.get())
@@ -257,6 +391,17 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось добавить сотрудника: {e}")
 
     def edit_employee(self):
+        """
+            Изменение сотрудника.
+
+            Метод очищает таблицу проектов, загружает актуальный список проектов
+            из базы данных и отображает их в таблице. В случае ошибки при получении
+            данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.edit_employee()
+        """
         try:
             employee_first_name = self.employee_first_name_entry.get()
             employee_last_name = self.employee_last_name_entry.get()
@@ -274,6 +419,17 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось обновить сотрудника: {e}")
 
     def refresh_employees(self):
+        """
+            Обновляет список сотрудников в интерфейсе приложения.
+
+            Метод очищает таблицу сотрудников, загружает актуальный список сорудников
+            из базы данных и отображает их в таблице. В случае ошибки при получении
+            данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.refresh_employees()
+        """
         try: 
             for row in self.employees_list.get_children():
                 self.employees_list.delete(row)
@@ -284,6 +440,16 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось обновить сотрудников: {e}")
 
     def delete_task(self):
+        """
+            Удаление задачи.
+
+            Метод берет берет выбранную строку и удаляет задачу из базы данных, показывает сообщение об удалении и обновляет список задач.
+            В случае ошибки при получении данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.delete_task()
+        """
         try:
             selected = self.tasks_list.focus()
             if not selected:
@@ -297,21 +463,57 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Не удалось удалить задачу: {e}")
 
     def clear_task_fields(self):
+        """
+            Очистка поле ввода задач.
+
+            Метод очищает поля вввода на вкладке "Задачи".
+
+            Examples
+            --------
+            >>> app.clear_task_fields()
+        """
         self.task_name_entry.delete(0, tk.END)
         self.task_discription_entry.delete(0, tk.END)
         self.task_project_entry.set('')
         self.task_employee_entry.set('')
 
     def clear_project_fields(self):
+        """
+            Очистка поле ввода проектов.
+
+            Метод очищает поля вввода на вкладке "Проекты".
+
+            Examples
+            --------
+            >>> app.clear_project_fields()
+        """
         self.project_name_entry.delete(0, tk.END)
         self.project_status_entry.delete(0, tk.END)
         
     def clear_employee_fields(self):
+        """
+            Очистка поле ввода сотрудников.
+
+            Метод очищает поля вввода на вкладке "Сотрудники".
+
+            Examples
+            --------
+            >>> app.clear_employee_fields()
+        """
         self.employee_first_name_entry.delete(0, tk.END)
         self.employee_last_name_entry.delete(0, tk.END)
         self.employee_email_entry.delete(0, tk.END)
 
     def on_task_row_select(self, event):
+        """
+            Заполнение поле ввода при выбранной задаче.
+
+            Метод берет данные из выбранной строки и заполняет поля ввода.
+
+            Examples
+            --------
+            >>> app.on_task_row_select()
+        """
         selected_items = self.tasks_list.selection()
         if not selected_items:
             return
@@ -330,6 +532,15 @@ class TaskTrackerApp:
 
 
     def on_project_row_select(self, event):
+        """
+            Заполнение поле ввода при выбранному проекту.
+
+            Метод берет данные из выбранной строки и заполняет поля ввода.
+
+            Examples
+            --------
+            >>> app.on_project_row_select()
+        """
         selected_items = self.projects_list.selection()
         if not selected_items:
             return
@@ -342,6 +553,15 @@ class TaskTrackerApp:
         self.project_status_entry.set(values[2])
 
     def on_employee_row_select(self, event):
+        """
+            Заполнение поле ввода при выбранному сотруднику.
+
+            Метод берет данные из выбранной строки и заполняет поля ввода.
+
+            Examples
+            --------
+            >>> app.on_employee_row_select()
+        """
         selected_items = self.employees_list.selection()
         if not selected_items:
             return
@@ -358,6 +578,16 @@ class TaskTrackerApp:
         self.employee_email_entry.insert(0, values[3])
 
     def show_statistics(self):
+        """
+            Отображение статистики.
+
+            Метод берет значение проекта и формирует статисткику по нему.
+            В случае ошибки при получении данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.show_statistics()
+        """
         try:
             project_id = int(self.analysis_project_id_entry.get()[0][0])
             result = project_statistics(self.db, project_id)
@@ -377,6 +607,16 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Собрать статистику не получилось: {e}")
 
     def show_plot(self): # TODO подготовить тествоые данные, их подгрузку и сделать график со статусом по проектам - процент выполнения каждого проекта
+        """
+            Отображение графика.
+
+            Метод берет значение проекта и формирует график процента выполнения проекта.
+            В случае ошибки при получении данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.show_plot()
+        """
         try:
             project_id = int(self.analysis_project_id_entry.get()[0][0])
             result = project_statistics(self.db, project_id)
@@ -385,6 +625,16 @@ class TaskTrackerApp:
             messagebox.showerror("Ошибка", f"Собрать статистику не получилось: {e}")
 
     def save_report(self):
+        """
+            Сохранение отчета.
+
+            Метод берет данные из текстового поля со статистикой и сохраняет их в текстовый файл.
+            В случае ошибки при получении данных отображает сообщение об ошибке пользователю.
+
+            Examples
+            --------
+            >>> app.save_report()
+        """
         try:
             report = self.analysis_result.get(1.0, tk.END).strip()
             if not report:

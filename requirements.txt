@@ -1,2 +1,5 @@
 tkinter
 psycopg2
+pandas
+matpotlib
+seaboran
