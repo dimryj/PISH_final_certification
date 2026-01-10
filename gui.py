@@ -14,6 +14,7 @@ from storage import Database
 from analysis import project_statistics, plot_completion_rate
 import time
 from utils import is_valid_email, clean_string
+from seed import create_sample_data
 
 class TaskTrackerApp: #TODO разнести функции по вкладкам на разыне файлы, что бы было проще работать с отдальными вкладками
     """
@@ -69,6 +70,9 @@ class TaskTrackerApp: #TODO разнести функции по вкладка�
         tk.Label(self.tab_tasks, text="Название:").grid(row=0, column=0, padx=5, pady=5)
         self.task_name_entry = tk.Entry(self.tab_tasks, width=50)
         self.task_name_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        self.load_button = tk.Button(self.tab_tasks, text="Загрузить тестовые данные", command=self.create_sample_data, state=tk.NORMAL)
+        self.load_button.grid(row=0, column=2, columnspan=2, pady=10)
 
         tk.Label(self.tab_tasks, text="Описание:").grid(row=1, column=0, padx=5, pady=5)
         self.task_discription_entry = tk.Entry(self.tab_tasks, width=50)
@@ -650,6 +654,17 @@ class TaskTrackerApp: #TODO разнести функции по вкладка�
             messagebox.showinfo("Успех", "Отчёт сохранён в statistics.txt!")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось сохранить отчёт: {e}")
+
+    def create_sample_data(self):
+        try:
+            create_sample_data()
+            messagebox.showinfo("Успех", "Данные загружены!")
+            self.load_button.config(state=tk.DISABLED)
+            self.filter_tasks()
+            self.refresh_employees()
+            self.refresh_projects()
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось загрузить данные: {e}")
 
 
 if __name__ == "__main__":
