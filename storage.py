@@ -128,8 +128,8 @@ class Database:
                     cur.execute("""
                         SELECT t.id, t.name, t.discription, e.first_name || ' ' || e.last_name, p.name AS project_name, t. status
                         FROM tasks t
-                        JOIN projects p ON t.project_id = p.id
-                        JOIN employees e ON t.employee_id = e.id
+                        LEFT JOIN projects p ON t.project_id = p.id
+                        LEFT JOIN employees e ON t.employee_id = e.id
                         ORDER BY t.id
                     """)
                     rows = cur.fetchall()
@@ -527,8 +527,8 @@ class Database:
                     cur.execute("""
                         SELECT t.id, t.name, t.discription, e.id, e.first_name, e.last_name, p.name, p.id, t.status
                         FROM tasks t
-                        JOIN projects p ON t.project_id = p.id
-                        JOIN employees e ON t.employee_id = e.id
+                        LEFT JOIN projects p ON t.project_id = p.id
+                        LEFT JOIN employees e ON t.employee_id = e.id
                         ORDER BY t.id
                     """)
                     rows = cur.fetchall()

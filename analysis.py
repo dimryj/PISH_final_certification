@@ -72,7 +72,7 @@ def project_statistics(db: Database, project_id):
     employees = project_tasks["employee_id"].nunique()
 
     avg_tasks_per_assignee = total_tasks / employees if employees > 0 else 0
-    in_progress_ratio = len(project_tasks[project_tasks["status"] == "in_progress"]) / total_tasks
+    in_progress_ratio = (len(project_tasks[project_tasks["status"] == "in_progress"]) / total_tasks if total_tasks > 0 else 0)
 
     return {
         "total_tasks": total_tasks,

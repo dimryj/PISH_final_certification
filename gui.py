@@ -96,7 +96,7 @@ class TaskTrackerApp: #TODO разнести функции по вкладка�
 
         tk.Button(self.tab_tasks, text="Применить фильтр", command=self.filter_tasks).grid(row=6, column=2, padx=5, pady=5)
 
-        self.tasks_list = ttk.Treeview(self.tab_tasks, columns=('id', 'Название', 'Описание', 'Исполнитель', 'Проект', 'Статус'), show='headings', height=10)
+        self.tasks_list = ttk.Treeview(self.tab_tasks, columns=('id', 'Название', 'Описание', 'Исполнитель', 'Проект', 'Статус'), show='headings', height=15)
         self.tasks_list.heading('id', text='id')
         self.tasks_list.heading('Название', text='Название')
         self.tasks_list.heading('Описание', text='Описание')
@@ -214,9 +214,13 @@ class TaskTrackerApp: #TODO разнести функции по вкладка�
                 return
 
             discription = self.task_discription_entry.get()
-            project = int(self.task_project_entry.get()[0][0])
-            employee = self.task_employee_entry.get()[0][0]
-            employee = int(employee) if employee.strip() else None
+            project = self.task_project_entry.get()
+            project = int(project[0][0]) if project.strip() else None
+            if project == None:
+                messagebox.showerror("Ошибка", "Выберите проект!")
+                return
+            employee = self.task_employee_entry.get()
+            employee = int(employee[0][0]) if employee.strip() else None
 
             task = Task(name, discription, project, employee)
             self.db.add_task(task)
@@ -274,7 +278,7 @@ class TaskTrackerApp: #TODO разнести функции по вкладка�
 
             # Фильтрация по статусу
             if status_filter != "все":
-                tasks = [t for t in tasks if t[4] == status_filter]
+                tasks = [t for t in tasks if t[5] == status_filter]
 
             # Обновление списка
             for row in self.tasks_list.get_children():
